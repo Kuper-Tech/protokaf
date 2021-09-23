@@ -1,0 +1,75 @@
+run:
+  # default concurrency is a available CPU number
+  concurrency: 4
+
+  # timeout for analysis, e.g. 30s, 5m, default is 1m
+  timeout: 5m
+
+  # exit code when at least one issue was found, default is 1
+  issues-exit-code: 1
+
+  # include test files or not, default is true
+  tests: true
+
+  # skip download modules
+  modules-download-mode: readonly
+
+# output configuration options
+output:
+  # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
+  format: colored-line-number
+
+  # print lines of code with issue, default is true
+  print-issued-lines: true
+
+  # print linter name in the end of issue text, default is true
+  print-linter-name: true
+
+linters-settings:
+  funlen:
+    lines: 90
+  golint:
+    min-confidence: 0.9
+  lll:
+    line-length: 140
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - structcheck
+    - varcheck
+    - ineffassign
+    - deadcode
+    - typecheck
+    - bodyclose
+    - revive
+    - stylecheck
+    - gosec
+    - unconvert
+    - dupl
+    - goconst
+    - gocyclo
+    - gocognit
+    - gofmt
+    - depguard
+    - misspell
+    - lll
+    - dogsled
+    - nakedret
+    - prealloc
+    - exportloopref
+    - gocritic
+    - funlen
+    - whitespace
+
+issues:
+  # List of regexps of issue texts to exclude, empty list by default.
+  # But independently from this option we use default exclude patterns,
+  # it can be disabled by `exclude-use-default: false`. To list all
+  # excluded by default patterns execute `golangci-lint run --help`
+  exclude:
+     - Using the variable on range scope `tt` in function literal

@@ -1,0 +1,74 @@
+version: "3"
+
+services:
+  app:
+    container_name: ${APP_PROJECT}_app
+    build:
+      context: ../..
+      dockerfile: ./build/docker/Dockerfile
+      args:
+        - APP_PATH=${APP_PATH}
+    command: make none
+    depends_on:
+      - kafka
+    links:
+      - kafka:kafka.local
+    working_dir: ${APP_PATH}
+    volumes:
+      - ../..:${APP_PATH}
+      - $GOPATH/pkg/mod:/go/pkg/mod
+  kafka:
+    container_name: ${APP_PROJECT}_kafka
+    image: wurstmeister/kafka:2.13-2.7.0
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 1
+      KAFKA_ADVERTISED_LISTENERS: INSIDE_SASL://kafka:19093,INSIDE://kafka:19092,OUTSIDE_SASL://${DOCKER_HOST_IP:-127.0.0.1}:9093,OUTSIDE://${DOCKER_HOST_IP:-127.0.0.1}:9092
+      KAFKA_LISTENERS: INSIDE://:19092,INSIDE_SASL://:19093,OUTSIDE://:9092,OUTSIDE_SASL://:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,INSIDE_SASL:SASL_PLAINTEXT,OUTSIDE_SASL:SASL_PLAINTEXT,OUTSIDE:PLAINTEXT
+
+      # auth related options:
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_SASL_ENABLED_MECHANISMS: "PLAIN,SCRAM-SHA-256,SCRAM-SHA-512"
+      KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
+      KAFKA_SUPER_USERS: "User:admin"
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kafka-data:/opt/kafka
+      - ./kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+    depends_on:
+      - zookeeper
+    restart: always
+  zookeeper:
+    container_name: ${APP_PROJECT}_zookeeper
+    image: zookeeper:3.4.14
+    ports:
+      - "2181"
+  jaeger:
+    image: jaegertracing/all-in-one:1.22
+    container_name: ${APP_PROJECT}_jaeger
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+      - "9411:9411"
+
+volumes:
+  kafka-data:
+    driver: local
+
+networks:
+  default:
+    name: ${APP_PROJECT}

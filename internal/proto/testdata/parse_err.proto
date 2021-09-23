@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = ".";
+
+service Example {
+  rpc Hello(HelloRequest) returns (HelloResponse) {}
+
+}
+
+message {}

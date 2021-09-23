@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = ".";
+
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Example {
+  rpc Hello(HelloRequest) returns (HelloResponse) {}
+}
+
+message HelloRequest {
+  string name = 1;
+  int32 age = 2;
+}
+
+message HelloResponse {
+  string answer = 1;
+}
+
+message Num {
+  int32 num = 1;
+}
+
+message Empty {}

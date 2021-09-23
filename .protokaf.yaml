@@ -1,0 +1,7 @@
+debug: true
+broker: 0.0.0.0:9092
+#broker: 0.0.0.0:9093 # with auth
+#kafka-auth-dsn: "SCRAM-SHA-256:admin:secret"
+output: json # text
+proto:
+  - internal/proto/testdata/example.proto

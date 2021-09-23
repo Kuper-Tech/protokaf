@@ -1,0 +1,12 @@
+# IDE
+.idea
+.vscode
+
+# Output of the go covetage tool
+*.out
+
+# Test binary `go test -c`
+*.test
+!.env.test
+
+protokaf
