@@ -3,9 +3,9 @@
 Kafka producer and consumer tool in protobuf format.
 
 ## Features
-- Sending and receiving messages
+- Consume and produce messages using Protobuf protocol
 - Trace messages with Jaeger
-- Sending messages using a template with random data
+- Create custom templates for one or multiple messages and produce them to Kafka
 
 ## Install
 ```sh
@@ -13,7 +13,9 @@ go install github.com/SberMarket-Tech/protokaf@latest
 ```
 
 ## Configuration
-Configuration file is optional. If no configuration file was specified with `-F ..` on the command line, `protokaf` will try `.protokaf.yaml`, `$HOME/.protokaf.yaml`.
+Configuration file is optional, so you can skip this section.
+
+In order for Protokaf to work, it needs to know how to reach your Kafka broker. First option is to provide `--broker` each time you invoke Protokaf. Another option is to use a configuration file. You can provide Protokaf with a configuration file with option `-F ..` on the command line. Or by default Protokaf will search its config files in `.protokaf.yaml` and `$HOME/.protokaf.yaml` respectively.
 
 **Example of `.protokaf.yaml`**
 ```yaml
