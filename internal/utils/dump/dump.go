@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/jhump/protoreflect/dynamic"
 )
 
@@ -57,16 +58,22 @@ func (p Pairs) Dump(log Logger) {
 	}
 }
 
+func marshalJSONCustom(msg *dynamic.Message) func() ([]byte, error) {
+	return func() ([]byte, error) {
+		return msg.MarshalJSONPB(&jsonpb.Marshaler{Indent: "  ", EmitDefaults: true})
+	}
+}
+
 // DynamicMessage dumps dynamic.Message.
 func DynamicMessage(log Logger, name, output string, msg *dynamic.Message) {
-	marshaller := msg.MarshalJSONIndent
+	marshaller := marshalJSONCustom(msg)
 
 	switch output {
 	case "text":
 		marshaller = msg.MarshalTextIndent
 
 	case "json":
-		marshaller = msg.MarshalJSONIndent
+		marshaller = marshalJSONCustom(msg)
 	}
 
 	data, err := marshaller()
