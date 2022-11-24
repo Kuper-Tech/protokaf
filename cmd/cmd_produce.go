@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"sync/atomic"
@@ -261,7 +261,7 @@ func readData(dataFlag string) ([]byte, error) {
 	log.Debug("Reading data from stdin...")
 
 	reader := bufio.NewReader(os.Stdin)
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
