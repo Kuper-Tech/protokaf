@@ -55,6 +55,7 @@ services:
     image: zookeeper:3.4.14
     ports:
       - "2181"
+    platform: "linux/x86_64"
   jaeger:
     image: jaegertracing/all-in-one:1.22
     container_name: ${APP_PROJECT}_jaeger

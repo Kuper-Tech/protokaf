@@ -18,6 +18,7 @@ func NewConsumeCmd() *cobra.Command {
 		groupFlag  string
 		topicsFlag []string
 		countFlag  int
+		noCommit   bool
 	)
 
 	cmd := &cobra.Command{
@@ -37,6 +38,9 @@ func NewConsumeCmd() *cobra.Command {
 				return
 			}
 
+			if noCommit {
+				kafkaConfig.Consumer.Offsets.AutoCommit.Enable = false
+			}
 			// consumer
 			consumer, err := kafka.NewConsumerGroup(viper.GetStringSlice("broker"), groupFlag, kafkaConfig)
 			if err != nil {
@@ -77,6 +81,7 @@ func NewConsumeCmd() *cobra.Command {
 	flags.StringVarP(&groupFlag, "group", "G", "", "Consumer group")
 	flags.StringSliceVarP(&topicsFlag, "topic", "t", []string{}, "Topic to consume from")
 	flags.IntVarP(&countFlag, "count", "c", 0, "Exit after consuming this number of messages")
+	flags.BoolVar(&noCommit, "no-commit", false, "Consume messages without commiting offset")
 
 	_ = cmd.MarkFlagRequired("group")
 	_ = cmd.MarkFlagRequired("topic")
