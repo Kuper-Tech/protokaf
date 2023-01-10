@@ -55,19 +55,28 @@ func NewConsumeCmd() *cobra.Command {
 					log.Infof("Message consuming limit: %d", countFlag)
 				}
 
-				err := consumer.Consume(context.Background(), topicsFlag, &protoHandler{
+				handler := &protoHandler{
 					MaxCount: countFlag,
 					desc:     md,
-				})
-				if err != nil {
-					consumer.Close()
 				}
+
+				err := consumer.Consume(context.Background(), topicsFlag, handler)
+
+				if handler.maximumReached() {
+					log.Debugf("Message consuming limit reached: %d", countFlag)
+					return
+				}
+
+				if err != nil {
+					log.Errorf("Consume error: %s", err)
+				}
+
+				consumer.Close()
 			}()
 
 			// track errors
 			for err = range consumer.Errors() {
 				if errors.Is(err, ErrMaximumReached) {
-					log.Debugf("Message consuming limit reached: %d", countFlag)
 					return nil
 				}
 			}
@@ -123,12 +132,20 @@ func (h *protoHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sara
 		h.counter++
 		log.Debugf("Message consuming count: %d", h.counter)
 
-		if h.counter == h.MaxCount {
+		if h.maximumReached() {
 			return ErrMaximumReached
 		}
 	}
 
 	return nil
+}
+
+func (h protoHandler) maximumReached() bool {
+	if h.MaxCount != 0 {
+		return h.counter == h.MaxCount
+	}
+
+	return false
 }
 
 func dumpConsumerMessage(msg *sarama.ConsumerMessage) {
