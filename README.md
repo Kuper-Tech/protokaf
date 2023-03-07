@@ -99,7 +99,7 @@ $ protokaf produce HelloRequest \
 $ protokaf produce HelloRequest \
     --broker kafka:9093 \
     --kafka-auth-dsn "SCRAM-SHA-512:login:passwd" \
-    --proto api/example.proto \
+    --proto internal/proto/testdata/example.proto \
     --topic test \
     --data '{"name": "Alice", "age": 11}'
 ```
@@ -137,7 +137,7 @@ $ protokaf help consume
 ```sh
 $ protokaf consume HelloRequest \
     --broker kafka:9092 \
-    --proto api/example.proto \
+    --proto internal/proto/testdata/example.proto \
     --group mygroup \
     --topic test
 ```
