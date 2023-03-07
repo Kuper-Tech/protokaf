@@ -67,7 +67,7 @@ message HelloRequest {
 ```sh
 $ protokaf produce HelloRequest \
     --broker kafka:9092 \
-    --proto api/example.proto \
+    --proto internal/proto/testdata/example.proto \
     --topic test \
     --data '{"name": "Alice", "age": 11}'
 ```
@@ -76,7 +76,7 @@ $ protokaf produce HelloRequest \
 ```sh
 $ protokaf produce HelloRequest \
     --broker kafka:9092 \
-    --proto api/example.proto \
+    --proto internal/proto/testdata/example.proto \
     --topic test \
     --header "priority=high" \
     --header "application=protokaf" \
@@ -87,7 +87,7 @@ $ protokaf produce HelloRequest \
 ```sh
 $ protokaf produce HelloRequest \
     --broker kafka:9092 \
-    --proto api/example.proto \
+    --proto internal/proto/testdata/example.proto \
     --topic test \
     --data '{"name": {{randomFemaleName | quote}}, "age": {{randomNumber 10 20}}}' \
     --count 10 \
