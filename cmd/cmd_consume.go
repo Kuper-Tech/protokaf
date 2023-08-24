@@ -172,10 +172,8 @@ func (p protoHandler) Setup(sess sarama.ConsumerGroupSession) error {
 			if p.offsets != nil {
 				offset, ok := p.offsets[topic]
 				if !ok {
-					println("ok2")
 					continue
 				}
-				println("ok3")
 				sess.ResetOffset(topic, p.partition, offset, "")
 			}
 		}
