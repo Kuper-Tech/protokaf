@@ -16,6 +16,8 @@ import (
 	"sync"
 )
 
+var ErrInvalidOffset = errors.New("invalid offset format")
+
 func NewConsumeCmd() *cobra.Command {
 	var (
 		groupFlag  string
@@ -123,6 +125,9 @@ const globalOffset = "global"
 func parseOffsetsFlag(offsetsFlag []string) (offsets map[string]int64, err error) {
 	offsets = make(map[string]int64, len(offsetsFlag))
 	for _, offset := range offsetsFlag {
+		if offset == "" {
+			continue
+		}
 		i, err := strconv.ParseInt(offset, 10, 64)
 		if err == nil {
 			return map[string]int64{globalOffset: i}, nil
@@ -130,15 +135,15 @@ func parseOffsetsFlag(offsetsFlag []string) (offsets map[string]int64, err error
 
 		topicOffsetPair := strings.Split(offset, ":")
 		if len(topicOffsetPair) != 2 {
-			return nil, fmt.Errorf("invalid offset format: %s, "+
-				"expected: topic:123 (topic name and offset value) or 123 (global offset value for all topics)", offset)
+			return nil, fmt.Errorf("%w %s, "+
+				"expected: topic:123 (topic name and offset value) or 123 (global offset value for all topics)", ErrInvalidOffset, offset)
 		}
 		offsetForTopic, err := strconv.ParseInt(topicOffsetPair[1], 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("invalid offset format: %s, "+
+			return nil, fmt.Errorf("%w %s, "+
 				"failed to parse offset value: %s\n"+
 				"expected: topic:123 (topic name and offset value) or 123 (global offset value for all topics)\n"+
-				"error: %s", topicOffsetPair[1], offset, err)
+				"error: %s", ErrInvalidOffset, topicOffsetPair[1], offset, err)
 		}
 		offsets[topicOffsetPair[0]] = offsetForTopic
 	}
