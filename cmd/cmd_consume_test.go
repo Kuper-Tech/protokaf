@@ -65,5 +65,9 @@ func Test_parseOffsetsFlag(t *testing.T) {
 		v, err = parseOffsetsFlag([]string{"", "topic1:123", ""})
 		require.Equal(t, map[string]int64{"topic1": 123}, v)
 		require.NoError(t, err)
+
+		v, err = parseOffsetsFlag(nil)
+		require.Equal(t, map[string]int64{}, v)
+		require.NoError(t, err)
 	})
 }
