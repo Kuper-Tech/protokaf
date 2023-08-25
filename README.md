@@ -157,11 +157,6 @@ $ protokaf consume HelloRequest -G mygroup -t test -c 10
 $ protokaf consume HelloRequest -G mygroup -t test -o 5
 ```
 
-**Read from offset `5` messages from `test` topic and from offset `10` from `anothertest` topic**
-```sh
-$ protokaf consume HelloRequest -G mygroup -t test,anothertest -o test:5,anothertest:10
-```
-
 ## Testing
 
 ### Prepare test environment

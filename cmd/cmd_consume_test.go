@@ -16,58 +16,27 @@ func Test_NewConsumeCmd_NoTopicFlags(t *testing.T) {
 }
 
 func Test_parseOffsetsFlag(t *testing.T) {
-	t.Run("offsets for multiple topics", func(t *testing.T) {
-		offsets, err := parseOffsetsFlag([]string{"topic1:0", "topic2:1", "topic3:234", "topic4:123"})
+	t.Run("offset happy case", func(t *testing.T) {
+		offset, err := parseOffsetFlag("1")
 		require.Nil(t, err)
-		require.Equal(t, map[string]int64{
-			"topic1": 0,
-			"topic2": 1,
-			"topic3": 234,
-			"topic4": 123,
-		}, offsets)
-	})
-
-	t.Run("global offset", func(t *testing.T) {
-		offsets, err := parseOffsetsFlag([]string{"123"})
-		require.Nil(t, err)
-		require.Equal(t, map[string]int64{
-			globalOffset: 123,
-		}, offsets)
-	})
-
-	t.Run("global offset", func(t *testing.T) {
-		offsets, err := parseOffsetsFlag([]string{"123"})
-		require.Nil(t, err)
-		require.Equal(t, map[string]int64{
-			globalOffset: 123,
-		}, offsets)
-	})
-
-	t.Run("global offset has priority over other definitions", func(t *testing.T) {
-		offsets, err := parseOffsetsFlag([]string{"123", "topic1:123", "topic2:321"})
-		require.Nil(t, err)
-		require.Equal(t, map[string]int64{
-			globalOffset: 123,
-		}, offsets)
+		require.EqualValues(t, 1, offset)
 	})
 
 	t.Run("error when offset is not a number", func(t *testing.T) {
-		v, err := parseOffsetsFlag([]string{"topic1:123", "topic2:abc"})
-		require.Nil(t, v)
+		v, err := parseOffsetFlag("fdgdfg")
 		require.ErrorIs(t, err, ErrInvalidOffset)
+		require.EqualValues(t, -1, v)
 	})
 
-	t.Run("skip empty offset", func(t *testing.T) {
-		v, err := parseOffsetsFlag([]string{""})
-		require.Equal(t, map[string]int64{}, v)
-		require.NoError(t, err)
+	t.Run("error empty offset", func(t *testing.T) {
+		v, err := parseOffsetFlag("")
+		require.ErrorIs(t, err, ErrOffsetNotSet)
+		require.EqualValues(t, -1, v)
+	})
 
-		v, err = parseOffsetsFlag([]string{"", "topic1:123", ""})
-		require.Equal(t, map[string]int64{"topic1": 123}, v)
-		require.NoError(t, err)
-
-		v, err = parseOffsetsFlag(nil)
-		require.Equal(t, map[string]int64{}, v)
-		require.NoError(t, err)
+	t.Run("error negative offset", func(t *testing.T) {
+		v, err := parseOffsetFlag("-1")
+		require.ErrorIs(t, err, ErrInvalidOffset)
+		require.EqualValues(t, -1, v)
 	})
 }
