@@ -152,6 +152,11 @@ $ protokaf consume HelloRequest -G mygroup -t test
 $ protokaf consume HelloRequest -G mygroup -t test -c 10
 ```
 
+**Read from offset `5` messages from `test` topic**
+```sh
+$ protokaf consume HelloRequest -G mygroup -t test -o 5
+```
+
 ## Testing
 
 ### Prepare test environment

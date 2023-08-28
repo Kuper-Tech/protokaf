@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
-
+	"fmt"
 	"github.com/SberMarket-Tech/protokaf/internal/kafka"
 	"github.com/SberMarket-Tech/protokaf/internal/utils/dump"
 	"github.com/Shopify/sarama"
@@ -11,6 +11,13 @@ import (
 	"github.com/jhump/protoreflect/dynamic"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"strconv"
+	"sync"
+)
+
+var (
+	ErrInvalidOffset = errors.New("invalid offset format")
+	ErrOffsetNotSet  = errors.New("offset not set")
 )
 
 func NewConsumeCmd() *cobra.Command {
@@ -19,6 +26,7 @@ func NewConsumeCmd() *cobra.Command {
 		topicsFlag []string
 		countFlag  int
 		noCommit   bool
+		offset     string
 	)
 
 	cmd := &cobra.Command{
@@ -41,6 +49,7 @@ func NewConsumeCmd() *cobra.Command {
 			if noCommit {
 				kafkaConfig.Consumer.Offsets.AutoCommit.Enable = false
 			}
+
 			// consumer
 			consumer, err := kafka.NewConsumerGroup(viper.GetStringSlice("broker"), groupFlag, kafkaConfig)
 			if err != nil {
@@ -58,9 +67,18 @@ func NewConsumeCmd() *cobra.Command {
 				handler := &protoHandler{
 					MaxCount: countFlag,
 					desc:     md,
+					topic:    topicsFlag[0],
 				}
 
-				err := consumer.Consume(context.Background(), topicsFlag, handler)
+				// set offset
+				offsetsArg, err := parseOffsetFlag(offset)
+				if err != nil && !errors.Is(err, ErrOffsetNotSet) {
+					log.Errorf("Failed to parse offset: %s", err)
+					return
+				}
+				handler.offset = offsetsArg
+
+				err = consumer.Consume(context.Background(), topicsFlag, handler)
 
 				if handler.maximumReached() {
 					log.Debugf("Message consuming limit reached: %d", countFlag)
@@ -91,6 +109,7 @@ func NewConsumeCmd() *cobra.Command {
 	flags.StringSliceVarP(&topicsFlag, "topic", "t", []string{}, "Topic to consume from")
 	flags.IntVarP(&countFlag, "count", "c", 0, "Exit after consuming this number of messages")
 	flags.BoolVar(&noCommit, "no-commit", false, "Consume messages without commiting offset")
+	flags.StringVarP(&offset, "offset", "o", "", "Start consuming from this offset (default: newest)")
 
 	_ = cmd.MarkFlagRequired("group")
 	_ = cmd.MarkFlagRequired("topic")
@@ -98,12 +117,43 @@ func NewConsumeCmd() *cobra.Command {
 	return cmd
 }
 
+func parseOffsetFlag(offsetsFlag string) (offset int64, err error) {
+	if offsetsFlag == "" {
+		return -1, ErrOffsetNotSet
+	}
+	intOffst, err := strconv.ParseInt(offsetsFlag, 10, 64)
+	if err != nil {
+		return -1, fmt.Errorf("error with offset '%s': %w", offsetsFlag, ErrInvalidOffset)
+	}
+	if intOffst < 0 {
+		return -1, fmt.Errorf("error negative offset '%s': %w", offsetsFlag, ErrInvalidOffset)
+	}
+	return intOffst, nil
+}
+
 type protoHandler struct {
 	desc              *desc.MessageDescriptor
 	MaxCount, counter int
+	topic             string
+	partition         int32
+	offset            int64
 }
 
-func (protoHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+var once sync.Once
+
+func (p protoHandler) Setup(sess sarama.ConsumerGroupSession) error {
+	once.Do(func() {
+		if partFromFlags := flags.Partition; partFromFlags > 0 {
+			p.partition = partFromFlags
+		}
+
+		if p.offset >= 0 {
+			sess.ResetOffset(p.topic, p.partition, p.offset, "")
+		}
+	})
+	return nil
+}
+
 func (protoHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 
 // ErrMaximumReached error if limit reached
