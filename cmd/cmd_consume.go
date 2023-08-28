@@ -109,7 +109,7 @@ func NewConsumeCmd() *cobra.Command {
 	flags.StringSliceVarP(&topicsFlag, "topic", "t", []string{}, "Topic to consume from")
 	flags.IntVarP(&countFlag, "count", "c", 0, "Exit after consuming this number of messages")
 	flags.BoolVar(&noCommit, "no-commit", false, "Consume messages without commiting offset")
-	flags.StringVarP(&offset, "offset", "o", "", "Start consuming from this offset (default: newest))")
+	flags.StringVarP(&offset, "offset", "o", "", "Start consuming from this offset (default: newest)")
 
 	_ = cmd.MarkFlagRequired("group")
 	_ = cmd.MarkFlagRequired("topic")
