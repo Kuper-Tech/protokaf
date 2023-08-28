@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"sync"
+
 	"github.com/SberMarket-Tech/protokaf/internal/kafka"
 	"github.com/SberMarket-Tech/protokaf/internal/utils/dump"
 	"github.com/Shopify/sarama"
@@ -11,8 +14,6 @@ import (
 	"github.com/jhump/protoreflect/dynamic"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"strconv"
-	"sync"
 )
 
 var (
