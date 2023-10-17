@@ -159,9 +159,10 @@ $ protokaf consume HelloRequest -G mygroup -t test -o 5
 
 ## Testing
 
-### Prepare test environment
+### Prepare test environment and running tests
 ```sh
 make docker-dev-up
 make kafka-users
+make test
 make install # optional (you can use 'go run . <args> <flags>')
 ```
