@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/Shopify/sarama v1.29.1
-	github.com/golang/protobuf v1.5.2
+	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.3.0
 	github.com/jhump/protoreflect v1.9.0
 	github.com/opentracing/opentracing-go v1.2.0
