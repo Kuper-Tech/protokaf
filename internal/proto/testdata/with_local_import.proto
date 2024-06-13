@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = ".";
+
+import "google/type/money.proto";
+
+message WithMoney {
+  Money amount = 1;
+}

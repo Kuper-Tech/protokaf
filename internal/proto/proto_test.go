@@ -11,9 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testFile = "testdata/example.proto"
-
-var testfiles = []string{testFile}
+var testfiles = []string{
+	"testdata/example.proto",
+	"testdata/with_local_import.proto",
+}
 
 func TestProto_NewProto_Success(t *testing.T) {
 	p, err := NewProto(testfiles)
@@ -23,7 +24,7 @@ func TestProto_NewProto_Success(t *testing.T) {
 
 func TestProto_NewProto_HTTP_Request(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		file, err := os.Open(testFile)
+		file, err := os.Open(testfiles[0])
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -70,6 +71,7 @@ func TestProto_FindMessage(t *testing.T) {
 	}{
 		{"found", args{"HelloRequest"}, "HelloRequest", false},
 		{"found", args{"example.HelloRequest"}, "HelloRequest", false},
+		{"found", args{"WithMoney"}, "WithMoney", false},
 		{"not found", args{"NotFound"}, "", true},
 	}
 
