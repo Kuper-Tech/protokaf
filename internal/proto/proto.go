@@ -25,10 +25,6 @@ func NewProto(filenames []string, importPaths ...string) (p *Proto, err error) {
 	importPaths = append(importPaths, build.Default.SrcDirs()...)
 	importPaths = append(importPaths, "/")
 
-	parser := protoparse.Parser{
-		ImportPaths: importPaths,
-	}
-
 	// resolve filenames: local filename save as is, remote files are downloads and saves as temp files
 	paths := make([]string, 0, len(filenames))
 	for _, f := range filenames {
@@ -46,10 +42,17 @@ func NewProto(filenames []string, importPaths ...string) (p *Proto, err error) {
 
 			paths = append(paths, filename)
 		} else if p, _ := filepath.Glob(f); len(p) > 0 { // check pattern
+			for k := range p {
+				importPaths = append(importPaths, filepath.Dir(p[k]))
+			}
 			paths = append(paths, p...)
 		} else { // path
 			paths = append(paths, f)
 		}
+	}
+
+	parser := protoparse.Parser{
+		ImportPaths: importPaths,
 	}
 
 	descriptors, err := parser.ParseFiles(paths...)
