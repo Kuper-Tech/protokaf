@@ -5,7 +5,6 @@ package example;
 option go_package = ".";
 
 import "google/protobuf/timestamp.proto";
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 service Example {
   rpc Hello(HelloRequest) returns (HelloResponse) {}

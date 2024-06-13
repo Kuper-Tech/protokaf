@@ -19,7 +19,7 @@ services:
       - $GOPATH/pkg/mod:/go/pkg/mod
   kafka:
     container_name: ${APP_PROJECT}_kafka
-    image: wurstmeister/kafka:2.13-2.7.0
+    image: wurstmeister/kafka:2.13-2.8.1
     hostname: kafka
     ports:
       - "9092:9092"
@@ -57,7 +57,7 @@ services:
       - "2181"
     platform: "linux/x86_64"
   jaeger:
-    image: jaegertracing/all-in-one:1.22
+    image: jaegertracing/all-in-one:1.58
     container_name: ${APP_PROJECT}_jaeger
     environment:
       COLLECTOR_ZIPKIN_HTTP_PORT: 9411
