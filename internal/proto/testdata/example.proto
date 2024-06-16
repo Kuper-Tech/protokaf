@@ -11,15 +11,32 @@ service Example {
 }
 
 message HelloRequest {
+  enum Status {
+    PENDING = 0;
+    COMPLETED = 1;
+  }
+
+  message Data {
+    google.protobuf.Timestamp timestamp = 1;
+    bool completed = 2;
+    map<int64, string> properties = 3;
+    bytes blob = 4;
+  }
+
   string name = 1;
   int32 age = 2;
+  float amount = 4;
+  reserved 3;
+  Status status = 5;
+  repeated Numbers numbers = 6;
+  optional Data data = 7;
 }
 
 message HelloResponse {
   string answer = 1;
 }
 
-message Num {
+message Numbers {
   int32 num = 1;
 }
 
