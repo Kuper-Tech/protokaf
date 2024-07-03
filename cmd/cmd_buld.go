@@ -58,7 +58,6 @@ func buildMessage(message *dynamic.Message) *dynamic.Message {
 			)
 		} else if field.GetOneOf() != nil {
 			oneOfField := field.GetOneOf().GetChoices()[0]
-			//fmt.Println(message.GetField(oneOfFields[0]))
 			message.SetField(oneOfField, buildDefaultValue(oneOfField))
 		} else {
 			message.SetField(field, buildDefaultValue(field))
