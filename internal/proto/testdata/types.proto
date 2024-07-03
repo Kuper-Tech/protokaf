@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package example;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+
+// Enum definition
+enum ExampleEnum {
+    UNKNOWN = 0;
+    OPTION_ONE = 1;
+    OPTION_TWO = 2;
+}
+
+// Message definition
+message ExampleMessage {
+    // Scalar types
+    int32 int32_field = 1;
+    int64 int64_field = 2;
+    uint32 uint32_field = 3;
+    uint64 uint64_field = 4;
+    sint32 sint32_field = 5;
+    sint64 sint64_field = 6;
+    fixed32 fixed32_field = 7;
+    fixed64 fixed64_field = 8;
+    sfixed32 sfixed32_field = 9;
+    sfixed64 sfixed64_field = 10;
+    float float_field = 11;
+    double double_field = 12;
+    bool bool_field = 13;
+    string string_field = 14;
+    bytes bytes_field = 15;
+
+    // Enum type
+    ExampleEnum enum_field = 16;
+
+    // Nested message
+    message NestedMessage {
+        int32 nested_int32 = 1;
+        string nested_string = 2;
+    }
+
+    // Message type
+    NestedMessage message_field = 17;
+
+    // Repeated fields
+    repeated int32 repeated_int32_field = 18;
+    repeated string repeated_string_field = 19;
+
+    // Map fields
+    map<string, int32> map_string_int32_field = 20;
+    map<int32, NestedMessage> map_int32_message_field = 21;
+
+    // Oneof field
+    oneof my_oneof {
+        int32 option1 = 22;
+        string option2 = 23;
+        NestedMessage option3 = 24;
+    }
+
+    // Well-known types
+    google.protobuf.Any any_field = 25;
+    google.protobuf.Timestamp timestamp_field = 26;
+    google.protobuf.Duration duration_field = 27;
+    google.protobuf.Struct struct_field = 28;
+    google.protobuf.Value value_field = 29;
+    google.protobuf.ListValue list_value_field = 30;
+    google.protobuf.BoolValue bool_value_field = 31;
+    google.protobuf.BytesValue bytes_value_field = 32;
+    google.protobuf.DoubleValue double_value_field = 33;
+    google.protobuf.FloatValue float_value_field = 34;
+    google.protobuf.Int32Value int32_value_field = 35;
+    google.protobuf.Int64Value int64_value_field = 36;
+    google.protobuf.StringValue string_value_field = 37;
+    google.protobuf.UInt32Value uint32_value_field = 38;
+    google.protobuf.UInt64Value uint64_value_field = 39;
+}

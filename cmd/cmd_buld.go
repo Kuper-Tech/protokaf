@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/dynamic"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/types/descriptorpb"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 func NewBuildCmd() *cobra.Command {
@@ -28,12 +26,9 @@ func NewBuildCmd() *cobra.Command {
 				return
 			}
 
-			m := createMessage(
-				*dynamic.NewMessageFactoryWithDefaults(),
-				messageDescriptor,
-			)
+			msg := buildMessage(dynamic.NewMessage(messageDescriptor))
 
-			b, err := m.MarshalJSONPB(&jsonpb.Marshaler{
+			b, err := msg.MarshalJSONPB(&jsonpb.Marshaler{
 				EmitDefaults: true,
 				Indent:       "  ",
 			})
@@ -50,78 +45,66 @@ func NewBuildCmd() *cobra.Command {
 	return cmd
 }
 
-func createMessage(f dynamic.MessageFactory, md *desc.MessageDescriptor) *dynamic.Message {
-	m := f.NewDynamicMessage(md)
-
-	for _, v := range m.GetKnownFields() {
-		if v.IsProto3Optional() {
-			if v.IsRepeated() {
-				if mt := v.GetMessageType(); mt != nil {
-					m.AddRepeatedField(v, createMessage(f, mt))
-					continue
-				}
-			}
-
-			if v.GetType() == descriptor.FieldDescriptorProto_TYPE_MESSAGE {
-				m.SetField(v, createMessage(f, v.GetMessageType()))
-				continue
-			}
-
-			m.SetField(v, v.GetDefaultValue())
-		}
-
-		if v.IsRepeated() {
-			if mt := v.GetMessageType(); mt != nil {
-				m.AddRepeatedField(v, createMessage(f, mt))
-			} else {
-				switch v.GetType() {
-				case descriptorpb.FieldDescriptorProto_TYPE_FIXED32,
-					descriptorpb.FieldDescriptorProto_TYPE_UINT32:
-					m.AddRepeatedField(v, uint32(0))
-				case descriptorpb.FieldDescriptorProto_TYPE_SFIXED32,
-					descriptorpb.FieldDescriptorProto_TYPE_INT32,
-					descriptorpb.FieldDescriptorProto_TYPE_SINT32:
-					m.AddRepeatedField(v, int32(0))
-				case descriptorpb.FieldDescriptorProto_TYPE_FIXED64,
-					descriptorpb.FieldDescriptorProto_TYPE_UINT64:
-					m.AddRepeatedField(v, uint64(0))
-				case descriptorpb.FieldDescriptorProto_TYPE_SFIXED64,
-					descriptorpb.FieldDescriptorProto_TYPE_INT64,
-					descriptorpb.FieldDescriptorProto_TYPE_SINT64:
-					m.AddRepeatedField(v, int64(0))
-				case descriptorpb.FieldDescriptorProto_TYPE_FLOAT:
-					m.AddRepeatedField(v, float32(0))
-				case descriptorpb.FieldDescriptorProto_TYPE_DOUBLE:
-					m.AddRepeatedField(v, float64(0))
-				case descriptorpb.FieldDescriptorProto_TYPE_BOOL:
-					m.AddRepeatedField(v, false)
-				case descriptorpb.FieldDescriptorProto_TYPE_BYTES:
-					m.AddRepeatedField(v, []byte(nil))
-				case descriptorpb.FieldDescriptorProto_TYPE_STRING:
-					m.AddRepeatedField(v, "")
-				case descriptorpb.FieldDescriptorProto_TYPE_ENUM:
-					if v.IsProto3Optional() {
-						m.AddRepeatedField(v, 0)
-					} else {
-						enumVals := v.GetEnumType().GetValues()
-						if len(enumVals) > 0 {
-							m.AddRepeatedField(v, enumVals[0].GetNumber())
-						} else {
-							m.AddRepeatedField(v, 0)
-						}
-					}
-				default:
-					panic(fmt.Sprintf("Unknown field type: %v", v.GetType()))
-				}
-			}
-			continue
-		}
-
-		if v.GetType() == descriptor.FieldDescriptorProto_TYPE_MESSAGE {
-			m.SetField(v, createMessage(f, v.GetMessageType()))
-			continue
+func buildMessage(message *dynamic.Message) *dynamic.Message {
+	for _, field := range message.GetMessageDescriptor().GetFields() {
+		if field.IsRepeated() {
+			message.SetField(field, []interface{}{buildDefaultValue(field)})
+		} else if field.IsMap() {
+			message.SetField(
+				field,
+				map[interface{}]interface{}{
+					buildDefaultValue(field.GetMapKeyType()): buildDefaultValue(field.GetMapValueType()),
+				},
+			)
+		} else if field.GetOneOf() != nil {
+			oneOfField := field.GetOneOf().GetChoices()[0]
+			//fmt.Println(message.GetField(oneOfFields[0]))
+			message.SetField(oneOfField, buildDefaultValue(oneOfField))
+		} else {
+			message.SetField(field, buildDefaultValue(field))
 		}
 	}
 
-	return m
+	return message
+}
+
+func buildDefaultValue(field *desc.FieldDescriptor) interface{} {
+	switch field.GetType() {
+	case descriptorpb.FieldDescriptorProto_TYPE_FIXED32,
+		descriptorpb.FieldDescriptorProto_TYPE_UINT32:
+		return uint32(0)
+	case descriptorpb.FieldDescriptorProto_TYPE_SFIXED32,
+		descriptorpb.FieldDescriptorProto_TYPE_INT32,
+		descriptorpb.FieldDescriptorProto_TYPE_SINT32:
+		return int32(0)
+	case descriptorpb.FieldDescriptorProto_TYPE_FIXED64,
+		descriptorpb.FieldDescriptorProto_TYPE_UINT64:
+		return uint64(0)
+	case descriptorpb.FieldDescriptorProto_TYPE_SFIXED64,
+		descriptorpb.FieldDescriptorProto_TYPE_INT64,
+		descriptorpb.FieldDescriptorProto_TYPE_SINT64:
+		return int64(0)
+	case descriptorpb.FieldDescriptorProto_TYPE_FLOAT:
+		return float32(0)
+	case descriptorpb.FieldDescriptorProto_TYPE_DOUBLE:
+		return float64(0)
+	case descriptorpb.FieldDescriptorProto_TYPE_BOOL:
+		return true
+	case descriptorpb.FieldDescriptorProto_TYPE_BYTES:
+		return []byte(nil)
+	case descriptorpb.FieldDescriptorProto_TYPE_STRING:
+		return ""
+	case descriptorpb.FieldDescriptorProto_TYPE_ENUM:
+		return field.GetEnumType().GetValues()[0].GetNumber()
+	case descriptorpb.FieldDescriptorProto_TYPE_MESSAGE:
+		if field.GetMessageType().GetFullyQualifiedName() == "google.protobuf.Any" {
+			val, _ := anypb.New(nil)
+
+			return val
+		}
+
+		return buildMessage(dynamic.NewMessage(field.GetMessageType()))
+	}
+
+	return nil
 }
