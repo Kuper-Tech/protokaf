@@ -47,19 +47,20 @@ func NewBuildCmd() *cobra.Command {
 
 func buildMessage(message *dynamic.Message) *dynamic.Message {
 	for _, field := range message.GetMessageDescriptor().GetFields() {
-		if field.IsRepeated() {
+		switch {
+		case field.IsRepeated():
 			message.SetField(field, []interface{}{buildDefaultValue(field)})
-		} else if field.IsMap() {
+		case field.IsMap():
 			message.SetField(
 				field,
 				map[interface{}]interface{}{
 					buildDefaultValue(field.GetMapKeyType()): buildDefaultValue(field.GetMapValueType()),
 				},
 			)
-		} else if field.GetOneOf() != nil {
+		case field.GetOneOf() != nil:
 			oneOfField := field.GetOneOf().GetChoices()[0]
 			message.SetField(oneOfField, buildDefaultValue(oneOfField))
-		} else {
+		default:
 			message.SetField(field, buildDefaultValue(field))
 		}
 	}
