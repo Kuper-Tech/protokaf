@@ -51,7 +51,7 @@ $ protokaf produce -h
 ### Examples
 This proto file will be used in the examples below. 
 
-`api/example.ptoto`
+`api/example.proto`
 ```protobuf
 syntax = "proto3";
 
@@ -125,6 +125,44 @@ $ protokaf produce HelloRequest -t test -d '{"name": "Alice", "age": 11}'
 **Show all template functions**
 ```sh
 $ protokaf produce --template-functions-print
+```
+
+## Build json template by proto file
+This can be useful for creating body for produce command
+```sh
+$ protokaf build HelloRequest --proto internal/proto/testdata/example.proto
+```
+For proto file
+```protobuf
+syntax = "proto3";
+
+package example;
+
+message HelloRequest {
+  enum Status {
+    PENDING = 0;
+    COMPLETED = 1;
+  }
+
+  string name = 1;
+  int32 age = 2;
+  optional float amount = 4;
+  Status status = 5;
+  repeated string keys = 6;
+}
+```
+command will print
+```json
+{
+  "name": "",
+  "age": 0,
+  "amount": 0,
+  "status": "PENDING",
+  "keys": [
+    ""
+  ]
+}
+
 ```
 
 ## Consume
