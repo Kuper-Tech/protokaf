@@ -25,6 +25,9 @@ jobs:
       env: 
          GOPROXY: "https://proxy.golang.org"
       run: go mod download
+    
+    - name: Run compose
+      run: APP_PROJECT=protokaf docker-compose -f build/docker/docker-compose.yaml up -d
 
     - name: Test
       run: go test -v -coverprofile=coverage.txt ./...
