@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/SberMarket-Tech/protokaf/internal/kafka"
-	"github.com/SberMarket-Tech/protokaf/internal/utils/dump"
 	"github.com/Shopify/sarama"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/dynamic"
+	"github.com/kuper-tech/protokaf/internal/kafka"
+	"github.com/kuper-tech/protokaf/internal/utils/dump"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

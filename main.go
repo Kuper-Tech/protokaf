@@ -1,6 +1,6 @@
 package main
 
-import "github.com/SberMarket-Tech/protokaf/cmd"
+import "github.com/kuper-tech/protokaf/cmd"
 
 func main() {
 	cmd.Execute()

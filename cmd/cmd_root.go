@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/SberMarket-Tech/protokaf/internal/kafka"
 	"github.com/Shopify/sarama"
+	"github.com/kuper-tech/protokaf/internal/kafka"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
