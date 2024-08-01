@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/SberMarket-Tech/protokaf/internal/kafka"
+	"github.com/kuper-tech/protokaf/internal/kafka"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

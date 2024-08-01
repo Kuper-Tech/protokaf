@@ -9,7 +9,7 @@ Kafka producer and consumer tool in protobuf format.
 
 ## Install
 ```sh
-go install github.com/SberMarket-Tech/protokaf@latest
+go install github.com/kuper-tech/protokaf@latest
 ```
 
 ## Configuration

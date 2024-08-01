@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/SberMarket-Tech/protokaf/internal/proto"
 	"github.com/jhump/protoreflect/desc"
+	"github.com/kuper-tech/protokaf/internal/proto"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

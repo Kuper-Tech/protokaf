@@ -1,4 +1,4 @@
-module github.com/SberMarket-Tech/protokaf
+module github.com/kuper-tech/protokaf
 
 go 1.19
 
